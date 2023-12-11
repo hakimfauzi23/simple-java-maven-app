@@ -1,9 +1,15 @@
 node {
     def mavenImage = 'maven:3.9.0'
-    stage('Build') {
+
+    stage('Build and Test') {
         def mavenContainer = docker.image(mavenImage).run('-v /root/.m2:/root/.m2')
+
+        def mavenHome = mavenContainer.inside {
+            sh 'echo $M2_HOME' 
+        }.trim()
+
         try {
-            sh(script: 'mvn -B -DskipTests clean package', container: mavenContainer.id)
+            sh "export PATH=${mavenHome}/bin:\$PATH && mvn -B -DskipTests clean package"
         } finally {
             mavenContainer.stop()
             mavenContainer.remove(force: true)
@@ -12,8 +18,14 @@ node {
 
     stage('Test') {
         def mavenTestContainer = docker.image(mavenImage).run('-v /root/.m2:/root/.m2')
+
+        def mavenTestHome = mavenTestContainer.inside {
+            sh 'echo $M2_HOME' 
+        }.trim()
+
         try {
-            sh(script: 'mvn test', container: mavenTestContainer.id)
+            sh "export PATH=${mavenTestHome}/bin:\$PATH && mvn test"
+
             junit 'target/surefire-reports/*.xml'
         } finally {
             mavenTestContainer.stop()
