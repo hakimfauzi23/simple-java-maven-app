@@ -1,7 +1,9 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
-echo 'The following command terminates the "npm start" process using its PID'
+echo 'The following command terminates the "my-app-1.0-SNAPSHOT.jar" Java process using its PID'
 echo '(written to ".pidfile"), all of which were conducted when "deliver.sh"'
 echo 'was executed.'
 set -x
-kill $(cat .pidfile)
+
+# Use the `pkill` command to terminate the Java process with the specified name
+pkill -f my-app-1.0-SNAPSHOT.jar
